@@ -3,6 +3,7 @@ var mkdirp = require('mkdirp');
 var crypto = require("crypto");
 var fs = require('fs');
 var rimraf = require("rimraf");
+var path = require('path');
 int.alphabet('abcdefghijklmnopqrstuvwxyz0123456789');
 
 function makePath(input) {
@@ -36,23 +37,28 @@ function Cabs(basePath) {
     throw new Error('path required');
   }
   this.basePath = basePath;
-  if (this.basePath[-1] !== '/') {
-    this.basePath = this.basePath + '/';
+}
+
+Cabs.prototype.hashPaths = function(hash) {
+  var pathParts = makePath(hash);
+  var folderName = path.join(this.basePath, pathParts[0]);
+  var fileName = pathParts.slice(1).join('');
+  return {
+    folder: folderName,
+    file: fileName,
+    full: path.join(folderName, fileName)
   }
 }
 
 Cabs.prototype.write = function(chunk, callback) {
   var self = this;
   var hash = makeHash(chunk);
-  var pathParts = makePath(hash);
-  var fName = pathParts.pop();
-  var path = this.basePath + pathParts.join('/');
-  mkdirp(path, function (err) {
+  var paths = this.hashPaths(hash);
+  mkdirp(paths.folder, function (err) {
     if (err) {
       return callback(err);
     }
-    var fullPath = path + '/' + fName;
-    fs.writeFile(fullPath, chunk, function(err){
+    fs.writeFile(paths.full, chunk, function(err){
       if (err) {
         return callback(err);
       }
@@ -61,33 +67,21 @@ Cabs.prototype.write = function(chunk, callback) {
   });
 };
 Cabs.prototype.read = function(hash, callback) {
-  var path = this.basePath + makePath(hash).join('/');
-  var self = this;
-  fs.readFile(path, callback);
+  var paths = this.hashPaths(hash);
+  fs.readFile(paths.full, callback);
 };
 Cabs.prototype.rm = function(hash, callback) {
-  var pathParts = makePath(hash);
   var self = this;
-  var path = this.basePath + pathParts.join('/');
-  function checkEmpty(){
-    pathParts.pop();
-    if(!pathParts.length){
-      return callback();
-    }
-    var dirPath = self.basePath + pathParts.join('/');
-    fs.rmdir(dirPath, function (err){
-      if(err){
-        return callback();
-      } else {
-        process.nextTick(checkEmpty);
-      }
-    });
-  }
-  fs.unlink(path, function (err) {
+  var paths = this.hashPaths(hash);
+  fs.unlink(paths.full, function (err) {
     if (err) {
       return callback(err);
     }
-    checkEmpty();
+    // try and clean up empty folders
+    fs.rmdir(paths.folder, function(err) {
+      // ignore errors
+      callback();
+    });
   });
 };
 Cabs.prototype.destroy = function(callback) {
