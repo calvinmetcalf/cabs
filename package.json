@@ -1,6 +1,6 @@
 {
   "name": "cabs",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Content Addressable Buffer Store",
   "main": "index.js",
   "dependencies": {
