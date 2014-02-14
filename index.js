@@ -1,7 +1,7 @@
 
 var util = require('util');
-var Cab = require('./cab');
-var ByteStream = require('./byteStream');
+var Cabs = require('./cabs');
+var ByteStream = require('byte-stream');
 var Transform = require('readable-stream').Transform;
 
 
@@ -15,7 +15,7 @@ function WriteCabs(basePath) {
   Transform.call(this, {
     objectMode:true
   });
-  this.cabs = new Cab(basePath);
+  this.cabs = new Cabs(basePath);
   this.written = 0;
 }
 WriteCabs.prototype._transform = function (chunk, _, callback) {
@@ -41,7 +41,7 @@ function ReadCabs(basePath) {
   Transform.call(this, {
     objectMode:true
   });
-  this.cabs = new Cab(basePath);
+  this.cabs = new Cabs(basePath);
 }
 ReadCabs.prototype._transform = function (chunk, _, callback) {
   var self = this;
@@ -60,3 +60,4 @@ exports.write = function (path, limit){
   var writter = new WriteCabs(path);
   return chunker.pipe(writter);
 };
+exports.Cabs = Cabs;

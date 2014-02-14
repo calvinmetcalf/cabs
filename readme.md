@@ -1,4 +1,4 @@
-CAB
+CABS
 ====
 
 exports read and write methods

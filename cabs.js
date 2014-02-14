@@ -2,6 +2,7 @@ var int = require('int-encoder');
 var mkdirp = require('mkdirp');
 var crypto = require("crypto");
 var fs = require('fs');
+var rimraf = require("rimraf");
 int.alphabet('abcdefghijklmnopqrstuvwxyz0123456789');
 
 function makePath(input) {
@@ -31,7 +32,10 @@ function Cabs(basePath) {
   if(!(this instanceof Cabs)){
     return new Cabs(basePath);
   }
-  this.basePath = basePath || './';
+  if(!basePath){
+    throw new Error('path required');
+  }
+  this.basePath = basePath;
   if (this.basePath[-1] !== '/') {
     this.basePath = this.basePath + '/';
   }
@@ -59,11 +63,34 @@ Cabs.prototype.write = function(chunk, callback) {
 Cabs.prototype.read = function(hash, callback) {
   var path = this.basePath + makePath(hash).join('/');
   var self = this;
-  fs.readFile(path, function (err, data) {
+  fs.readFile(path, callback);
+};
+Cabs.prototype.rm = function(hash, callback) {
+  var pathParts = makePath(hash);
+  var self = this;
+  var path = this.basePath + pathParts.join('/');
+  function checkEmpty(){
+    pathParts.pop();
+    if(!pathParts.length){
+      return callback();
+    }
+    var dirPath = self.basePath + pathParts.join('/');
+    fs.rmdir(dirPath, function (err){
+      if(err){
+        return callback();
+      } else {
+        process.nextTick(checkEmpty);
+      }
+    });
+  }
+  fs.unlink(path, function (err) {
     if (err) {
       return callback(err);
     }
-    callback(null, data);
+    checkEmpty();
   });
+};
+Cabs.prototype.destroy = function(callback) {
+  rimraf(this.basePath, callback);
 };
 module.exports = Cabs;

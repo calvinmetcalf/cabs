@@ -1,8 +1,7 @@
 var should = require('chai').should();
-var cab = require('./');
+var cabs = require('./');
 var fs = require('fs');
 var through = require('through2');
-var rimraf = require('rimraf');
 var result = [ 
   {
     start: 0,
@@ -11,14 +10,11 @@ var result = [
   } 
 ];
 describe('cab', function(){
-  after(function(done){
-    rimraf('./testData', done);
-  });
   it('should work', function(done){
     var tdata = through();
     tdata.write(new Buffer('abc'));
     tdata.end();
-    var outstream = cab.write('./testData');
+    var outstream = cabs.write('./testData');
     outstream.on('data',function(data){
       data.should.deep.equal(result[0]);
       done();
@@ -27,7 +23,7 @@ describe('cab', function(){
   });
   it('should be readable', function(done){
     var times = 0;
-    var thing = cab.read('./testData');
+    var thing = cabs.read('./testData');
     thing.write(result[0]);
     thing.end();
     thing.pipe(through(function(data, _, cb){
@@ -35,5 +31,39 @@ describe('cab', function(){
         done();
         cb();
     }));
+  });
+   it('should be removable', function(done){
+    var obj = new cabs.Cabs('./testData');
+    fs.readdir('./testData', function(err,data){
+      if(err){
+        return done(err);
+      }
+      data.should.have.length(1);
+      obj.rm(result[0].hash, function(err){
+        if(err){
+          return done(err);
+        }
+        fs.readdir('./testData', function(err,data){
+          if(err){
+            return done(err);
+          }
+          data.should.have.length(0);
+          done();
+        });
+      });
+    });
+  });
+  it('should be destroyable', function (done) {
+    fs.existsSync('./testData').should.equal(true);
+    var obj = cabs.Cabs('./testData');
+    obj.destroy(function(err){
+      fs.existsSync('./testData').should.equal(false);
+      done(err);
+    });
+  });
+  it('should throw an error if no path is provided', function(){
+    (function(){
+      var obj = new cabs.Cabs();
+    }).should.throw();
   });
 });
