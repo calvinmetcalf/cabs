@@ -1,8 +1,9 @@
 var int = require('int-encoder');
-var mkdirp = requrire('mkdirp');
-var crypto = reqiure("crypto");
+var mkdirp = require('mkdirp');
+var crypto = require("crypto");
 var util = require('util');
 var es = require('event-stream');
+var fs = require('fs');
 var Transform = require('stream').Transform;
 int.alphabet('abcdefghijklmnopqrstuvwxyz0123456789');
 function makePath(input) {
@@ -31,8 +32,8 @@ function makeHash(input) {
 util.inherits(WriteCabs, Transform);
 
 function WriteCabs(opts) {
-  if (!(this instanceof Cabs)) {
-    return new Cabs(opts);
+  if (!(this instanceof WriteCabs)) {
+    return new WriteCabs(opts);
   }
   Transform.call(this, opts);
   this.basePath = opts.basePath || './';
@@ -43,13 +44,15 @@ function WriteCabs(opts) {
   this.currentStart = 0;
   this.blockSize = 5 * 1024 * 1024;
 }
-
 WriteCabs.prototype._transform = function (chunk, _, callback) {
-  var self = this;
   this.current = Buffer.concat([this.current, chunk], this.current.length + chunk.length);
   if (this.current.length < this.blockSize) {
     return callback();
   }
+  this._flush(callback);
+};
+WriteCabs.prototype._flush = function (callback) {
+  var self = this;
   var hash = makeHash(this.current);
   var pathParts = makePath(hash);
   var fName = pathParts.pop();
@@ -69,22 +72,63 @@ WriteCabs.prototype._transform = function (chunk, _, callback) {
       self.currentStart = out.end;
       out.hash = hash;
       self.current = new Buffer(0);
-      callback(null, out);
+      self.push(out);
+      callback();
     });
   });
 };
+util.inherits(ReadCabs, Transform);
 
-function cabs (instream, path, cb) {
+function ReadCabs(opts) {
+  if (!(this instanceof ReadCabs)) {
+    return new ReadCabs(opts);
+  }
+  Transform.call(this, opts);
+  this.basePath = opts.basePath || './';
+  if (this.basePath[-1] !== '/') {
+    this.basePath = this.basePath + '/';
+  }
+}
+ReadCabs.prototype._transform = function (chunk, _, callback) {
+  var path = this.basePath + makePath(chunk.hash).join('/');
+  var self = this;
+  fs.readFile(path, function (err, data) {
+    if (err) {
+      return callback(err);
+    }
+    self.push(data);
+    callback();
+  });
+};
+
+exports.read = function (stuff, path) {
+  var obj = new ReadCabs({
+    basePath: path,
+    objectMode: true
+  });
+  stuff.sort(function (a,b) {
+    return a.start - b.start;
+  });
+  stuff.forEach(function(item){
+    obj.write(item);
+  });
+  obj.end();
+  return obj;
+};
+function cabs (instream, path, callback) {
   var out = [];
   var obj = new WriteCabs({
-    basePath: path
+    basePath: path,
+    objectMode: true
   });
   var collector = es.map(function(data,cb){
     out.push(data);
     cb();
   });
-  collector.on('error', cb);
-  collector.on('end', cb(null, out));
+  collector.on('error', callback);
+  collector.on('end', function(){
+    callback(null, out);
+  });
   instream.pipe(obj).pipe(collector);
 }
-module.exports = cabs;
+exports.write = cabs;

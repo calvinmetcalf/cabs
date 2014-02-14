@@ -1,0 +1,34 @@
+{
+  "name": "cabs",
+  "version": "0.0.0",
+  "description": "CAB ====",
+  "main": "cab.js",
+  "dependencies": {
+    "chai": "~1.9.0",
+    "event-stream": "~3.1.0",
+    "int-encoder": "~0.1.4",
+    "istanbul": "~0.2.4",
+    "mkdirp": "~0.3.5",
+    "rimraf": "~2.2.6",
+    "through2": "~0.4.1"
+  },
+  "devDependencies": {
+    "mocha": "~1.17.1",
+    "rimraf": "~2.2.6",
+    "through2": "~0.4.1",
+    "chai": "~1.9.0"
+  },
+  "scripts": {
+    "test": "./node_modules/istanbul/lib/cli.js test ./node_modules/mocha/bin/_mocha test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:calvinmetcalf/cabs.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/calvinmetcalf/cabs/issues"
+  },
+  "homepage": "https://github.com/calvinmetcalf/cabs"
+}
