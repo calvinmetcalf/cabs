@@ -66,4 +66,45 @@ describe('cab', function(){
       var obj = new cabs.Cabs();
     }).should.throw();
   });
+  it('should work, with a limit', function(done){
+    var tdata = through();
+    tdata.write(new Buffer('abcdefghij'));
+    tdata.end();
+    var outstream = cabs.write('./testData2', 2);
+    var results = [];
+    outstream.on('data',function(data){
+      results.push(data);
+    });
+    outstream.on('end', function(){
+      results.should.deep.equal([ 
+        {
+          start: 0,
+          end: 2,
+          hash: 'cdqix4qpfui6sadzipo67fq4tye8i42x7tysv6jstto47c8zapojdo58jy80p8mosf563kppr97'
+        },
+        {
+          start: 2,
+          end: 4,
+          hash: 'byqtf6k10edx3qh4q2r2nextfs6ep0yjr5tddbt6bb9yuhp7mlzkytynnml1kt4px8nwhvh1h94'
+        },
+        {
+          start: 4,
+          end: 6,
+          hash: '6jvohie1r1pv0g9fyboipw29fjn4tmxs5m42f41vfort5h66yutw0wkkbyl7e5h7w75rq05vjj'
+        },
+        {
+          start: 6,
+          end: 8,
+          hash: 'bw3ufxxsb31dopmmuft05l9iqr15nok7g2rjbnxybrs7dbz7qa3sxd74y95ye9ow9p4wguzfndv'
+        },
+        {
+          start: 8,
+          end: 10,
+          hash: 'n17b1ifyyx961ujs2ggo9w05glg6ffaw6v3gj8xiyk8gguvrhunjhxdxr23gdbu449qh305lrw'
+        }
+     ]);
+      cabs.Cabs('./testData2').destroy(done);
+    });
+    tdata.pipe(outstream);
+  });
 });

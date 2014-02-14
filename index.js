@@ -22,7 +22,8 @@ WriteCabs.prototype._transform = function (chunk, _, callback) {
  var out = {};
  var self = this;
  out.start = this.written;
- out.end = this.written + chunk.length;
+ this.written += chunk.length;
+ out.end = this.written;
  this.cabs.write(chunk, function(err, hash){
   if(err){
     return callback(err);
