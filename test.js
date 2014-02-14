@@ -18,10 +18,12 @@ describe('cab', function(){
     var tdata = through();
     tdata.write(new Buffer('abc'));
     tdata.end();
-    cab.write(tdata, './testData', function(err, data){
-      data.should.deep.equal(result);
+    var outstream = cab.write('./testData');
+    outstream.on('data',function(data){
+      data.should.deep.equal(result[0]);
       done();
     });
+    tdata.pipe(outstream);
   });
   it('should be readable', function(done){
     var times = 0;

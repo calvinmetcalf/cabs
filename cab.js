@@ -2,7 +2,6 @@ var int = require('int-encoder');
 var mkdirp = require('mkdirp');
 var crypto = require("crypto");
 var util = require('util');
-var es = require('event-stream');
 var fs = require('fs');
 var Transform = require('stream').Transform;
 int.alphabet('abcdefghijklmnopqrstuvwxyz0123456789');
@@ -115,20 +114,10 @@ exports.read = function (stuff, path) {
   obj.end();
   return obj;
 };
-function cabs (instream, path, callback) {
-  var out = [];
-  var obj = new WriteCabs({
+function cabs (path) {
+  return new WriteCabs({
     basePath: path,
     objectMode: true
   });
-  var collector = es.map(function(data,cb){
-    out.push(data);
-    cb();
-  });
-  collector.on('error', callback);
-  collector.on('end', function(){
-    callback(null, out);
-  });
-  instream.pipe(obj).pipe(collector);
 }
 exports.write = cabs;
