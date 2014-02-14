@@ -3,7 +3,7 @@ var util = require('util');
 var Cabs = require('./cabs');
 var ByteStream = require('byte-stream');
 var Transform = require('readable-stream').Transform;
-
+var pipeline = require('event-stream').pipeline;
 
 
 util.inherits(WriteCabs, Transform);
@@ -58,6 +58,6 @@ exports.write = function (path, limit){
   limit = limit || 5 * 1024 * 1024;
   var chunker = new ByteStream(limit);
   var writter = new WriteCabs(path);
-  return chunker.pipe(writter);
+  return pipeline(chunker, writter);
 };
 exports.Cabs = Cabs;
