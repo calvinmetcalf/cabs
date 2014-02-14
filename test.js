@@ -1,5 +1,5 @@
 var should = require('chai').should();
-var cab = require('./cab');
+var cab = require('./');
 var fs = require('fs');
 var through = require('through2');
 var rimraf = require('rimraf');

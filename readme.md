@@ -7,7 +7,7 @@ write
 ====
 
 ```javascript
-cab.write(path);
+cab.write(path, limit);
 ```
 
 pipe in a stream, get objects, (you will need to pipe to read)

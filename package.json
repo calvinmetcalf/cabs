@@ -2,7 +2,7 @@
   "name": "cabs",
   "version": "0.2.0",
   "description": "CAB ====",
-  "main": "cab.js",
+  "main": "index.js",
   "dependencies": {
     "chai": "~1.9.0",
     "event-stream": "~3.1.0",
@@ -10,7 +10,8 @@
     "istanbul": "~0.2.4",
     "mkdirp": "~0.3.5",
     "rimraf": "~2.2.6",
-    "stdout": "0.0.3"
+    "stdout": "0.0.3",
+    "readable-stream": "~1.1.10"
   },
   "devDependencies": {
     "mocha": "~1.17.1",
