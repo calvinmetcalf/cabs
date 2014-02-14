@@ -19,7 +19,7 @@
     "chai": "~1.9.0"
   },
   "scripts": {
-    "test": "./node_modules/istanbul/lib/cli.js test ./node_modules/mocha/bin/_mocha test.js"
+    "test": "istanbul test ./node_modules/mocha/bin/_mocha test.js"
   },
   "repository": {
     "type": "git",
