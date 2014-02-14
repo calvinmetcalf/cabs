@@ -10,7 +10,6 @@
     "istanbul": "~0.2.4",
     "mkdirp": "~0.3.5",
     "rimraf": "~2.2.6",
-    "through2": "~0.4.1",
     "stdout": "0.0.3"
   },
   "devDependencies": {
