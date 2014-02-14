@@ -11,7 +11,8 @@
     "mkdirp": "~0.3.5",
     "rimraf": "~2.2.6",
     "stdout": "0.0.3",
-    "readable-stream": "~1.1.10"
+    "readable-stream": "~1.1.10",
+    "ldjson-stream": "~0.0.1"
   },
   "devDependencies": {
     "mocha": "~1.17.1",

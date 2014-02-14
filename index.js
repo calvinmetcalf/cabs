@@ -1,10 +1,7 @@
-
 var util = require('util');
 var Cab = require('./cab');
 var ByteStream = require('./byteStream');
 var Transform = require('readable-stream').Transform;
-
-
 
 util.inherits(WriteCabs, Transform);
 
