@@ -1,7 +1,7 @@
 CABS
 ====
 
-Content Addressable Blob Store
+Content Addressable Buffer Store
 
 write
 ====
