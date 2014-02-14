@@ -27,8 +27,10 @@ describe('cab', function(){
   });
   it('should be readable', function(done){
     var times = 0;
-    var thing = cab.read(result,'./testData')
-      .pipe(through(function(data, _, cb){
+    var thing = cab.read('./testData');
+    thing.write(result[0]);
+    thing.end();
+    thing.pipe(through(function(data, _, cb){
         data.should.deep.equal(new Buffer('abc'));
         done();
         cb();

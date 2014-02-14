@@ -7,16 +7,16 @@ write
 ====
 
 ```javascript
-cab.write(instream, path, callback);
+cab.write(path);
 ```
 
-callback is called with an array
+pipe in a stream, get objects, (you will need to pipe to read)
 
 read
 ====
 
 ```javascript
-cab.read(stuffFromWrite, path)
+cab.read(path)
 ```
 
-returns a readable stream
+pipe in the objects from write, returns a readable stream

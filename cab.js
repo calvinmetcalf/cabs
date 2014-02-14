@@ -34,6 +34,12 @@ function WriteCabs(opts) {
   if (!(this instanceof WriteCabs)) {
     return new WriteCabs(opts);
   }
+  if (typeof opts === 'string'){
+    opts = {
+      objectMode:true,
+      basePath: opts
+    };
+  }
   Transform.call(this, opts);
   this.basePath = opts.basePath || './';
   if (this.basePath[-1] !== '/') {
@@ -82,6 +88,12 @@ function ReadCabs(opts) {
   if (!(this instanceof ReadCabs)) {
     return new ReadCabs(opts);
   }
+  if (typeof opts === 'string'){
+    opts = {
+      objectMode:true,
+      basePath: opts
+    };
+  }
   Transform.call(this, opts);
   this.basePath = opts.basePath || './';
   if (this.basePath[-1] !== '/') {
@@ -99,25 +111,5 @@ ReadCabs.prototype._transform = function (chunk, _, callback) {
     callback();
   });
 };
-
-exports.read = function (stuff, path) {
-  var obj = new ReadCabs({
-    basePath: path,
-    objectMode: true
-  });
-  stuff.sort(function (a,b) {
-    return a.start - b.start;
-  });
-  stuff.forEach(function(item){
-    obj.write(item);
-  });
-  obj.end();
-  return obj;
-};
-function cabs (path) {
-  return new WriteCabs({
-    basePath: path,
-    objectMode: true
-  });
-}
-exports.write = cabs;
+exports.read = ReadCabs;
+exports.write = WriteCabs;
