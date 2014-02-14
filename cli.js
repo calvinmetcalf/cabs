@@ -1,7 +1,4 @@
 #!/usr/bin/env node
-var cabs = require('./');
-var stdout = require('stdout');
-process.stdin.pipe(cabs.write(process.argv[2] || process.cwd())).pipe(stdout());
 // write a file: cabs blobfolder/ < data.jpg > data-hashes.json
 // read a file: cabs checkout blobfolder/ < data-hashes.json > data-copy.jpg
 var cabs = require('./')
