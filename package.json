@@ -4,14 +4,12 @@
   "description": "Content Addressable Buffer Store",
   "main": "index.js",
   "dependencies": {
-    "int-encoder": "~0.1.4",
     "mkdirp": "~0.3.5",
     "rimraf": "~2.2.6",
-    "stdout": "0.0.3",
     "readable-stream": "~1.1.10",
-    "event-stream": "~3.1.0",
     "ldjson-stream": "~0.0.1",
-    "byte-stream": "~1.0.0"
+    "byte-stream": "~1.0.0",
+    "stream-combiner": "~0.0.4"
   },
   "devDependencies": {
     "mocha": "~1.17.1",

@@ -1,10 +1,8 @@
-var int = require('int-encoder');
 var mkdirp = require('mkdirp');
 var crypto = require("crypto");
 var fs = require('fs');
 var rimraf = require("rimraf");
 var path = require('path');
-int.alphabet('abcdefghijklmnopqrstuvwxyz0123456789');
 
 function makePath(input) {
   var last;
@@ -47,8 +45,8 @@ Cabs.prototype.hashPaths = function(hash) {
     folder: folderName,
     file: fileName,
     full: path.join(folderName, fileName)
-  }
-}
+  };
+};
 
 Cabs.prototype.write = function(chunk, callback) {
   var self = this;
