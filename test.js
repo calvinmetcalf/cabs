@@ -6,7 +6,7 @@ var result = [
   {
     start: 0,
     end: 3,
-    hash: 'ceyun6xbmmsfibs9ny4sr7w530v39cz1z2drmm2ww1otd414dfe72260gc1x1cqzlai3zyo2lg5' 
+    hash: 'a9993e364706816aba3e25717850c26c9cd0d89d' 
   } 
 ];
 describe('cab', function(){
@@ -80,27 +80,27 @@ describe('cab', function(){
         {
           start: 0,
           end: 2,
-          hash: 'cdqix4qpfui6sadzipo67fq4tye8i42x7tysv6jstto47c8zapojdo58jy80p8mosf563kppr97'
+          hash: 'da23614e02469a0d7c7bd1bdab5c9c474b1904dc'
         },
         {
           start: 2,
           end: 4,
-          hash: 'byqtf6k10edx3qh4q2r2nextfs6ep0yjr5tddbt6bb9yuhp7mlzkytynnml1kt4px8nwhvh1h94'
+          hash: '034778198a045c1ed80be271cdd029b76874f6fc'
         },
         {
           start: 4,
           end: 6,
-          hash: '6jvohie1r1pv0g9fyboipw29fjn4tmxs5m42f41vfort5h66yutw0wkkbyl7e5h7w75rq05vjj'
+          hash: 'f822051471957b7bbebb8ab088fe9bd6d14f4261'
         },
         {
           start: 6,
           end: 8,
-          hash: 'bw3ufxxsb31dopmmuft05l9iqr15nok7g2rjbnxybrs7dbz7qa3sxd74y95ye9ow9p4wguzfndv'
+          hash: '1041179cbdda366fd7b0347f09255f775170e103'
         },
         {
           start: 8,
           end: 10,
-          hash: 'n17b1ifyyx961ujs2ggo9w05glg6ffaw6v3gj8xiyk8gguvrhunjhxdxr23gdbu449qh305lrw'
+          hash: '4cfa380a7a05ae26270f5ea888009520ab54b677'
         }
      ]);
       cabs.Cabs('./testData2').destroy(done);
