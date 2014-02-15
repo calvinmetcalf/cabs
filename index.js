@@ -2,7 +2,7 @@ var util = require('util');
 var Cabs = require('./cabs');
 var ByteStream = require('byte-stream');
 var Transform = require('readable-stream').Transform;
-var pipeline = require('event-stream').pipeline;
+var pipeline = require('stream-combiner');
 
 util.inherits(WriteCabs, Transform);
 
