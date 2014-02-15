@@ -22,11 +22,11 @@ function makePath(input) {
   return out;
 }
 function makeHash(input) {
-  var hash = crypto.createHash('sha384');
+  var hash = crypto.createHash('sha1');
   hash.write(input);
   hash.end();
   var buffer = hash.read();
-  return int.encode(buffer.toString('hex'),16);
+  return buffer.toString('hex');
 }
 
 function Cabs(basePath) {
