@@ -1,7 +1,7 @@
 {
   "name": "cabs",
   "version": "0.6.1",
-  "description": "Content Addressable Buffer Store",
+  "description": "content addressable blob store for node",
   "main": "index.js",
   "dependencies": {
     "mkdirp": "~0.3.5",
@@ -27,7 +27,10 @@
     "type": "git",
     "url": "git@github.com:calvinmetcalf/cabs.git"
   },
-  "author": "",
+  "author": "Calvin Metcalf",
+  "contributors": [
+    { "name" : "Max Ogden"}
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/calvinmetcalf/cabs/issues"

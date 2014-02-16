@@ -1,7 +1,11 @@
-CABS
+cabs
 ====
 
-Content Addressable Buffer Store
+A [Content Addressable Blob Store](https://en.wikipedia.org/wiki/Content-addressable_storage) for Node.
+
+[![NPM](https://nodei.co/npm/cabs.png)](https://nodei.co/npm/cabs/)
+
+By default this implements the object store (`.git/objects` folder) from `git`, where blobs are `sha1` hashed and stored in subdirectories to avoid putting too many files in a single directory.
 
 write
 ====
@@ -10,17 +14,35 @@ write
 cabs.write(path, limit);
 ```
 
-pipe in a stream, get objects for the various pieces stored, each object has a hash of the block, as well as the starting and ending locations within the stream.
+Pipe in a blob stream (e.g. fs.createReadStream), get back objects for the various pieces stored. Each object has a hash of the block, as well as the starting and ending locations within the stream.
 ```
 
 read
 ====
 
 ```javascript
-cabs.read(path)
+cabs.read(path);
 ```
 
-pipe in the objects from write, returns a readable stream
+Pipe in the objects from write, returns a readable stream of the blob.
+
+example
+====
+
+```js
+var fs = require('fs')
+var cabs = require('cabs')
+
+// stream a movie into cabs, store hashes in hashes.json
+fs.createReadStream('movie.avi')
+  .pipe(cabs.write('./storage))
+  .pipe(fs.createWriteStream('hashes.json'))
+  
+// later, to retrieve the movie, stream the hashes into cabs
+fs.createReadStream('hashes.json')
+  .pipe(cabs.read('./storage))
+  .pipe(fs.createWriteStream('movie-copy.avi'))
+```
 
 Low Level Class
 =====
