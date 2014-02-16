@@ -1,6 +1,6 @@
 {
   "name": "cabs",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "content addressable blob store for node",
   "main": "index.js",
   "dependencies": {
@@ -29,7 +29,9 @@
   },
   "author": "Calvin Metcalf",
   "contributors": [
-    { "name" : "Max Ogden"}
+    {
+      "name": "Max Ogden"
+    }
   ],
   "license": "MIT",
   "bugs": {
