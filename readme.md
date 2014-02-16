@@ -36,13 +36,13 @@ var Cabs = require('cabs')
 
 /** stream a movie into cabs, store hashes in hashes.json **/
 fs.createReadStream('movie.avi')
-  .pipe(Cabs.write('./storage))
-  .pipe(fs.createWriteStream('hashes.json'))
+  .pipe(Cabs.write('./storage'))
+  .pipe(fs.createWriteStream('hashes.json'));
   
 /** later, to retrieve the movie, stream the hashes into cabs **/
 fs.createReadStream('hashes.json')
   .pipe(Cabs.read('./storage))
-  .pipe(fs.createWriteStream('movie-copy.avi'))
+  .pipe(fs.createWriteStream('movie-copy.avi'));
 ```
 
 Low Level Class
