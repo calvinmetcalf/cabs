@@ -5,22 +5,23 @@ A [Content Addressable Blob Store](https://en.wikipedia.org/wiki/Content-address
 
 [![NPM](https://nodei.co/npm/cabs.png)](https://nodei.co/npm/cabs/)
 
-By default this implements the object store (`.git/objects` folder) from `git`, where blobs are `sha256` hashed and stored in subdirectories to avoid putting too many files in a single directory.
+This implements something similar to the object store from `git` (the `.git/objects` folder). By default blobs stored by cabs are `sha256` hashed and stored in subdirectories to avoid putting too many files in a single directory. The hashing algorithm and depth of the directories are configurable.
 
 write
 ====
 
-```javascript
+```js
 Cabs.write(path[, hashFunction, limit]);
 ```
 
-Pipe in a blob stream (e.g. fs.createReadStream), get back objects for the various pieces stored. Each object has a hash of the block, as well as the starting and ending locations within the stream. You may optionally pass a string representing the hash function to use (defaut sha256) and number representing hte block size (defautls to 5 MB).
-```
+Pipe in a blob stream (e.g. fs.createReadStream), get back objects for the various pieces stored. Each object has a hash of the block, as well as the starting and ending locations within the stream. You may optionally pass a string representing the hash function to use (default `sha256`) and number representing the block size (defaults to 5 MB).
+
+To learn more about hashing algorithm tradeoffs read the comments on [this issue](https://github.com/calvinmetcalf/cabs/pull/4).
 
 read
 ====
 
-```javascript
+```js
 Cabs.read(path);
 ```
 
@@ -33,12 +34,12 @@ example
 var fs = require('fs')
 var Cabs = require('cabs')
 
-// stream a movie into cabs, store hashes in hashes.json
+/** stream a movie into cabs, store hashes in hashes.json **/
 fs.createReadStream('movie.avi')
   .pipe(Cabs.write('./storage))
   .pipe(fs.createWriteStream('hashes.json'))
   
-// later, to retrieve the movie, stream the hashes into cabs
+/** later, to retrieve the movie, stream the hashes into cabs **/
 fs.createReadStream('hashes.json')
   .pipe(Cabs.read('./storage))
   .pipe(fs.createWriteStream('movie-copy.avi'))
