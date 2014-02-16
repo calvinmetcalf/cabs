@@ -76,4 +76,11 @@ store.readStream();
 
 store.writeStream();
 //same as Cabs.write
+
+store.has(hash, callback);
+//calls callback with true if it exists, otherwise false
+
+store.check(hash, callback);
+//similar to has but throws an error if the file doesn't exist
+//or it's hash doesn't match it's address hash
 ```

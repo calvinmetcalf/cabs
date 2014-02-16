@@ -120,4 +120,22 @@ Cabs.prototype.rm = function(hash, callback) {
 Cabs.prototype.destroy = function(callback) {
   rimraf(this.basePath, callback);
 };
+Cabs.prototype.check = function (hash, callback) {
+  var self = this;
+  fs.readFile(this.hashPaths(hash).full, function (err, file) {
+    if (err) {
+      return callback(err);
+    }
+    if (self.makeHash(file) === hash) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("hash doesn't match"));
+    }
+  });
+};
+Cabs.prototype.has = function (hash, callback) {
+  fs.exists(this.hashPaths(hash).full, function(answer) {
+    callback(null, answer);
+  });
+};
 module.exports = Cabs;

@@ -32,6 +32,39 @@ describe('cab', function(){
         cb();
     }));
   });
+  it('has should work to find something', function(done){
+    var thing = new Cabs('./testData');
+    thing.has(result[0].hash, function(err, answer) {
+      answer.should.equal(true);
+      done(err);
+    });
+  });
+  it('check should work to find something', function(done){
+    var thing = new Cabs({
+      path: './testData',
+      hashFunc: "sha1"
+    });
+    thing.check(result[0].hash, function(err, answer) {
+      answer.should.equal(true);
+      done(err);
+    });
+  });
+  it("has should not work to find something that isn't there", function(done){
+    var thing = new Cabs('./testData');
+    thing.has('aaaa' + result[0].hash, function(err, answer) {
+      answer.should.equal(false);
+      done(err);
+    });
+  });
+  it('check should not work to find something if the hash does not match', function(done){
+    var thing = new Cabs({
+      path: './testData'
+    });
+    thing.check(result[0].hash, function(err) {
+      should.exist(err);
+      done();
+    });
+  });
    it('should be removable', function(done){
     var obj = new Cabs('./testData');
     fs.readdir('./testData', function(err,data){
