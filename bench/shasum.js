@@ -2,7 +2,7 @@ var crypto = require('crypto')
 var fs = require('fs')
 var path = require('path')
 
-var hasher =  crypto.createHash('sha1')
+var hasher =  crypto.createHash('sha256')
 var file = fs.createReadStream(path.join(process.cwd(), process.argv[2]))
 
 console.time('hash')

@@ -1,5 +1,5 @@
 var should = require('chai').should();
-var cabs = require('./');
+var Cabs = require('./');
 var fs = require('fs');
 var through = require('through2');
 var result = [ 
@@ -14,7 +14,7 @@ describe('cab', function(){
     var tdata = through();
     tdata.write(new Buffer('abc'));
     tdata.end();
-    var outstream = cabs.write('./testData');
+    var outstream = Cabs.write('./testData', 'sha1');
     outstream.on('data',function(data){
       data.should.deep.equal(result[0]);
       done();
@@ -23,7 +23,7 @@ describe('cab', function(){
   });
   it('should be readable', function(done){
     var times = 0;
-    var thing = cabs.read('./testData');
+    var thing = Cabs.read('./testData');
     thing.write(result[0]);
     thing.end();
     thing.pipe(through(function(data, _, cb){
@@ -33,7 +33,7 @@ describe('cab', function(){
     }));
   });
    it('should be removable', function(done){
-    var obj = new cabs.Cabs('./testData');
+    var obj = new Cabs('./testData');
     fs.readdir('./testData', function(err,data){
       if(err){
         return done(err);
@@ -55,7 +55,7 @@ describe('cab', function(){
   });
   it('should be destroyable', function (done) {
     fs.existsSync('./testData').should.equal(true);
-    var obj = cabs.Cabs('./testData');
+    var obj = Cabs('./testData');
     obj.destroy(function(err){
       fs.existsSync('./testData').should.equal(false);
       done(err);
@@ -63,14 +63,14 @@ describe('cab', function(){
   });
   it('should throw an error if no path is provided', function(){
     (function(){
-      var obj = new cabs.Cabs();
+      var obj = new Cabs();
     }).should.throw();
   });
   it('should work, with a limit', function(done){
     var tdata = through();
     tdata.write(new Buffer('abcdefghij'));
     tdata.end();
-    var outstream = cabs.write('./testData2', 2);
+    var outstream = Cabs.write('./testData2', 'sha1', 2);
     var results = [];
     outstream.on('data',function(data){
       results.push(data);
@@ -91,7 +91,7 @@ describe('cab', function(){
   { start: 8,
     end: 10,
     hash: '4cfa380a7a05ae26270f5ea888009520ab54b677' } ]);
-      cabs.Cabs('./testData2').destroy(done);
+      Cabs('./testData2').destroy(done);
     });
     tdata.pipe(outstream);
   });

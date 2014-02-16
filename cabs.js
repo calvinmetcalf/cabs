@@ -4,7 +4,7 @@ var fs = require('fs');
 var rimraf = require("rimraf");
 var path = require('path');
 
-function makePath(input) {
+Cabs.prototype.makePath = function (input) {
   var last;
   var out = [];
   var i = -1;
@@ -19,28 +19,51 @@ function makePath(input) {
   }
   return out;
 }
-function makeHash(input) {
-  var hash = crypto.createHash('sha1');
+Cabs.prototype.makeHash = function (input) {
+  var hash = crypto.createHash(this.hashFunc);
   hash.write(input);
   hash.end();
   var buffer = hash.read();
   return buffer.toString('hex');
 }
 
-function Cabs(basePath) {
+function Cabs(opts, hash, limit) {
   if(!(this instanceof Cabs)){
-    return new Cabs(basePath);
+    return new Cabs(opts, hash, limit);
   }
-  if(!basePath){
+  if (typeof opts === 'string') {
+    opts = {
+      path: opts,
+      hashFunc: hash,
+      limit: limit
+    };
+  }
+  if (typeof opts.hashFunc === 'number') {
+    opts.limit = opts.hashFunc;
+    opts.hashFunc = undefined;
+  }
+  if(!opts.path){
     throw new Error('path required');
   }
-  this.basePath = basePath;
+  this.limit = opts.limit || 5 * 1024 * 1024;
+  this.hashFunc = opts.hashFunc || 'sha256';
+  this.basePath = opts.path;
+  this.depth = opts.depth || 3;
 }
 
 Cabs.prototype.hashPaths = function(hash) {
-  var pathParts = makePath(hash);
-  var folderName = path.join(this.basePath, pathParts[0]);
-  var fileName = pathParts.slice(1).join('');
+  var pathParts = this.makePath(hash);
+  var folders = [this.basePath];
+  var i = -1;
+  if (this.depth >= pathParts.length) {
+    folders.push(pathParts.shift());
+  } else {
+    while (++i < this.depth) {
+      folders.push(pathParts.shift());
+    }
+  }
+  var folderName = path.join.apply(null, folders);
+  var fileName = pathParts.join('');
   return {
     folder: folderName,
     file: fileName,
@@ -50,7 +73,7 @@ Cabs.prototype.hashPaths = function(hash) {
 
 Cabs.prototype.write = function(chunk, callback) {
   var self = this;
-  var hash = makeHash(chunk);
+  var hash = this.makeHash(chunk);
   var paths = this.hashPaths(hash);
   mkdirp(paths.folder, function (err) {
     if (err) {
@@ -69,17 +92,29 @@ Cabs.prototype.read = function(hash, callback) {
   fs.readFile(paths.full, callback);
 };
 Cabs.prototype.rm = function(hash, callback) {
+  var pathParts = this.hashPaths(hash).full.split(path.sep);
+  pathParts.shift();
   var self = this;
-  var paths = this.hashPaths(hash);
-  fs.unlink(paths.full, function (err) {
+  var ourPath = path.join(self.basePath,path.join.apply(undefined, pathParts));
+  function checkEmpty(){
+    pathParts.pop();
+    if(!pathParts.length){
+      return callback();
+    }
+    var dirPath = path.join(self.basePath,path.join.apply(undefined, pathParts));
+    fs.rmdir(dirPath, function (err){
+      if(err){
+        return callback();
+      } else {
+        process.nextTick(checkEmpty);
+      }
+    });
+  }
+  fs.unlink(ourPath, function (err) {
     if (err) {
       return callback(err);
     }
-    // try and clean up empty folders
-    fs.rmdir(paths.folder, function(err) {
-      // ignore errors
-      callback();
-    });
+    checkEmpty();
   });
 };
 Cabs.prototype.destroy = function(callback) {

@@ -6,14 +6,14 @@ var pipeline = require('stream-combiner');
 
 util.inherits(WriteCabs, Transform);
 
-function WriteCabs(basePath) {
+function WriteCabs(basePath, hash) {
   if (!(this instanceof WriteCabs)) {
     return new WriteCabs(basePath);
   }
   Transform.call(this, {
     objectMode:true
   });
-  this.cabs = new Cabs(basePath);
+  this.cabs = new Cabs(basePath, hash);
   this.written = 0;
 }
 WriteCabs.prototype._transform = function (chunk, _, callback) {
@@ -52,11 +52,28 @@ ReadCabs.prototype._transform = function (chunk, _, callback) {
     callback();
   });
 };
-exports.read = ReadCabs;
-exports.write = function (path, limit){
-  limit = limit || 5 * 1024 * 1024;
-  var chunker = new ByteStream(limit);
-  var writter = new WriteCabs(path);
-  return pipeline(chunker, writter);
+Cabs.read  = function (path, hash, limit){
+  var cabs = new Cabs({
+    path: path,
+    hashFunc: hash,
+    limit: limit
+  });
+  return cabs.readStream();
 };
-exports.Cabs = Cabs;
+Cabs.write = function (path, hash, limit){
+  var cabs = new Cabs({
+    path: path,
+    hashFunc: hash,
+    limit: limit
+  });
+  return cabs.writeStream();
+};
+Cabs.prototype.writeStream = function() {
+  var chunker = new ByteStream(this.limit);
+  var writer = new WriteCabs(this.basePath, this.hashFunc);
+  return pipeline(chunker, writer);
+};
+Cabs.prototype.readStream = function() {
+  return new ReadCabs(this.basePath);
+};
+module.exports = Cabs;
