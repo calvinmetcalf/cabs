@@ -89,7 +89,11 @@ Cabs.prototype.write = function(chunk, callback) {
 };
 Cabs.prototype.read = function(hash, callback) {
   var paths = this.hashPaths(hash);
-  fs.readFile(paths.full, callback);
+  if (callback) {
+    fs.readFile(paths.full, callback);
+  } else {
+    return fs.createReadStream(paths.full);
+  }
 };
 Cabs.prototype.rm = function(hash, callback) {
   var pathParts = this.hashPaths(hash).full.split(path.sep);
