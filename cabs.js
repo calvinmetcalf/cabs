@@ -18,14 +18,14 @@ Cabs.prototype.makePath = function (input) {
     }
   }
   return out;
-}
+};
 Cabs.prototype.makeHash = function (input) {
   var hash = crypto.createHash(this.hashFunc);
   hash.write(input);
   hash.end();
   var buffer = hash.read();
   return buffer.toString('hex');
-}
+};
 
 function Cabs(opts, hash, limit) {
   if(!(this instanceof Cabs)){
@@ -142,4 +142,5 @@ Cabs.prototype.has = function (hash, callback) {
     callback(null, answer);
   });
 };
+
 module.exports = Cabs;

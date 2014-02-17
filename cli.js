@@ -17,5 +17,5 @@ function read() {
 }
 
 function write() {
-  process.stdin.pipe(cabs.write(dir)).pipe(ldjson.serialize()).pipe(process.stdout)
+  process.stdin.pipe(cabs.writeFile(dir)).pipe(ldjson.serialize()).pipe(process.stdout)
 }

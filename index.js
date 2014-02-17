@@ -7,6 +7,11 @@ var PassThrough = streams.PassThrough;
 var pipeline = require('stream-combiner');
 var duplexer = require('duplexer');
 var through = require('through2');
+var path = require('path');
+var fs = require('fs');
+var mkdirp = require('mkdirp');
+var crypto = require("crypto");
+var rimraf = require("rimraf");
 
 function flatten(){
   var out = new PassThrough({
@@ -27,7 +32,10 @@ function flatten(){
   });
   return duplexer(thing, out);
 }
-
+function psudoRandomish(){
+  return Date.now().toString(36) +
+    Math.random().toString(36).slice(2);
+}
 util.inherits(WriteCabs, Transform);
 
 function WriteCabs(basePath, hash) {
@@ -67,7 +75,7 @@ function ReadCabs(basePath) {
   this.cabs = new Cabs(basePath);
 }
 ReadCabs.prototype._transform = function (chunk, _, callback) {
-  this.push(this.cabs.read(chunk.hash));
+  this.push(this.cabs.read(typeof chunk === 'string'? chunk : chunk.hash));
   callback();
 };
 Cabs.read  = function (path, hash, limit){
@@ -86,6 +94,14 @@ Cabs.write = function (path, hash, limit){
   });
   return cabs.writeStream();
 };
+Cabs.writeFile = function (path, hash, limit){
+  var cabs = new Cabs({
+    path: path,
+    hashFunc: hash,
+    limit: limit
+  });
+  return cabs.writeFile();
+};
 Cabs.prototype.writeStream = function() {
   var chunker = new ByteStream(this.limit);
   var writer = new WriteCabs(this.basePath, this.hashFunc);
@@ -94,5 +110,50 @@ Cabs.prototype.writeStream = function() {
 Cabs.prototype.readStream = function() {
   var read = new ReadCabs(this.basePath);
   return pipeline(read, flatten());
+};
+Cabs.prototype.writeFile = function () {
+  var self = this;
+  var hash = crypto.createHash(this.hashFunc);
+  var tempPath = path.join(this.basePath, 'tmp');
+  var tempFile = path.join(tempPath, psudoRandomish());
+  var psopts = {
+    objectMode: true,
+    decodeStrings: false
+  };
+  var output = new PassThrough(psopts);
+  var input = new PassThrough(psopts);
+  mkdirp(tempPath, function (err){
+    if (err) {
+      output.emit('error', err);
+      return;
+    }
+    var fstream = fs.createWriteStream(tempFile);
+    input.pipe(hash);
+    input.pipe(fstream);
+    input.on('end', function (){
+      var fileHash = hash.read().toString('hex');
+      var hashPath = self.hashPaths(fileHash);
+      mkdirp(hashPath.folder, function (err){
+        if (err) {
+          output.emit('error', err);
+          return;
+        }
+        var outStream = fs.createWriteStream(hashPath.full);
+        var fromTemp = fs.createReadStream(tempFile);
+        fromTemp.pipe(outStream);
+        fromTemp.on('end', function (){
+          rimraf(tempPath, function (err) {
+            if (err) {
+              output.emit('error', err);
+            } else {
+              output.write(fileHash);
+              output.end();
+            }
+          });
+        });
+      });
+    });
+  });
+  return duplexer(input, output);
 };
 module.exports = Cabs;
