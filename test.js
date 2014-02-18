@@ -2,6 +2,8 @@ var should = require('chai').should();
 var Cabs = require('./');
 var fs = require('fs');
 var through = require('through2');
+var ByteStream = require('byte-stream');
+var rimraf = require("rimraf");
 var result = [ 
   {
     start: 0,
@@ -127,5 +129,26 @@ describe('cab', function(){
       Cabs('./testData2').destroy(done);
     });
     tdata.pipe(outstream);
+  });
+  it('should work with writeFile', function(done){
+    var cabs = new Cabs('./testData3');
+    var wf = cabs.writeFile();
+    var chunker = new ByteStream(2);
+    chunker.pipe(wf);
+    var hashes = [];
+    wf.on('data', function (data){
+      hashes.push(data);
+    });
+    wf.on('end', function (){
+      hashes.should.deep.equal(['72399361da6a7754fec986dca5b7cbaf1c810a28ded4abaf56b2106d06cb78b0'])
+      fs.readFile('./testData3/72/39/93/61da6a7754fec986dca5b7cbaf1c810a28ded4abaf56b2106d06cb78b0', {
+        encoding:"utf8"
+      }, function (err, data) {
+        data.should.equal('abcdefghij');
+        rimraf('./testData3', done);
+      });
+    });
+    chunker.write(new Buffer('abcdefghij'));
+    chunker.end();
   });
 });
