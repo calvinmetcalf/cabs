@@ -2,7 +2,7 @@
 // all non-directories in the top level of the folder you run this from will be
 // streamed into cabs, in a folder located at ../tmp-cabs-data relative to the folder
 // afterwards this cabs folder will be removed
-var cabs = require('../')
+var Cabs = require('../')
 var ldjson = require('ldjson-stream')
 var rimraf = require('rimraf')
 var fs = require('fs')
@@ -44,6 +44,10 @@ function proceed() {
 function write(file, cb) {
   var rs = fs.createReadStream(file)
   var ws = fs.createWriteStream(path.join(target, path.basename(file) + '.json'))
-  rs.pipe(cabs.write(blobs, 1024 * 1024 * 1024)).pipe(ldjson.serialize()).pipe(ws)
+  var opts = {
+    path: blobs
+  }
+  var cabs = new Cabs(opts)
+  rs.pipe(cabs.write()).pipe(ldjson.serialize()).pipe(ws)
   ws.on('close', cb)
 }
