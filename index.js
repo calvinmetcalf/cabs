@@ -1,6 +1,6 @@
 var util = require('util');
 var Cabs = require('./cabs');
-var ByteStream = require('byte-stream');
+var Chunker = require('./chunker');
 var streams = require('readable-stream');
 var Transform = streams.Transform;
 var PassThrough = streams.PassThrough;
@@ -11,7 +11,6 @@ var path = require('path');
 var fs = require('fs');
 var mkdirp = require('mkdirp');
 var crypto = require("crypto");
-var rimraf = require("rimraf");
 
 function flatten(){
   var out = new PassThrough({
@@ -36,33 +35,7 @@ function psudoRandomish(){
   return Date.now().toString(36) +
     Math.random().toString(36).slice(2);
 }
-util.inherits(WriteCabs, Transform);
 
-function WriteCabs(basePath, hash) {
-  if (!(this instanceof WriteCabs)) {
-    return new WriteCabs(basePath);
-  }
-  Transform.call(this, {
-    objectMode:true
-  });
-  this.cabs = new Cabs(basePath, hash);
-  this.written = 0;
-}
-WriteCabs.prototype._transform = function (chunk, _, callback) {
- var out = {};
- var self = this;
- out.start = this.written;
- this.written += chunk.length;
- out.end = this.written;
- this.cabs.write(chunk, function(err, hash){
-  if(err){
-    return callback(err);
-  }
-  out.hash = hash;
-  self.push(out);
-  callback();
- });
-};
 util.inherits(ReadCabs, Transform);
 
 function ReadCabs(basePath) {
@@ -103,9 +76,7 @@ Cabs.writeFile = function (path, hash, limit){
   return cabs.writeFile();
 };
 Cabs.prototype.writeStream = function() {
-  var chunker = new ByteStream(this.limit);
-  var writer = new WriteCabs(this.basePath, this.hashFunc);
-  return pipeline(chunker, writer);
+  return new Chunker(this, this.limit);
 };
 Cabs.prototype.readStream = function() {
   var read = new ReadCabs(this.basePath);
@@ -142,12 +113,14 @@ Cabs.prototype.writeFile = function () {
         var fromTemp = fs.createReadStream(tempFile);
         fromTemp.pipe(outStream);
         fromTemp.on('end', function (){
-          rimraf(tempPath, function (err) {
+          fs.unlink(tempFile, function (err) {
             if (err) {
               output.emit('error', err);
             } else {
-              output.write(fileHash);
-              output.end();
+              fs.rmdir(tempPath, function () {
+                output.write(fileHash);
+                output.end();
+              });
             }
           });
         });
