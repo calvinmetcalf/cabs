@@ -3,7 +3,43 @@ var crypto = require("crypto");
 var fs = require('fs');
 var rimraf = require("rimraf");
 var path = require('path');
+var duplexer = require('duplexer');
+var through = require('through2');
+var Chunker = require('./chunker');
+var PassThrough = require('readable-stream').PassThrough;
+var pipeline = require('stream-combiner');
 
+function readCabs(cabs) {
+  return through({
+    objectMode:true
+  }, function (chunk, _, callback) {
+  this.push(cabs.read(typeof chunk === 'string'? chunk : chunk.hash));
+  callback();
+});
+}
+function flatten(){
+  var out = new PassThrough({
+    objectMode: true,
+    decodeStrings: false
+  });
+  var thing = through({
+    objectMode: true,
+    decodeStrings: false
+  },function (chunk, _, next){
+    chunk.pipe(out, {end: false});
+    chunk.on('end',function () {
+      next();
+    });
+  }, function (next) {
+    out.emit('end');
+    next();
+  });
+  return duplexer(thing, out);
+}
+function psudoRandomish(){
+  return Date.now().toString(36) +
+    Math.random().toString(36).slice(2);
+}
 Cabs.prototype.makePath = function (input) {
   var last;
   var out = [];
@@ -72,20 +108,67 @@ Cabs.prototype.hashPaths = function(hash) {
 };
 
 Cabs.prototype.write = function(chunk, callback) {
+  var hash, paths;
   var self = this;
-  var hash = this.makeHash(chunk);
-  var paths = this.hashPaths(hash);
-  mkdirp(paths.folder, function (err) {
-    if (err) {
-      return callback(err);
-    }
-    fs.writeFile(paths.full, chunk, function(err){
+  if (chunk && callback) {
+    hash = this.makeHash(chunk);
+    paths = this.hashPaths(hash);
+    return mkdirp(paths.folder, function (err) {
       if (err) {
         return callback(err);
       }
-      callback(null, hash);
+      fs.writeFile(paths.full, chunk, function(err){
+        if (err) {
+          return callback(err);
+        }
+        callback(null, hash);
+      });
+    });
+  }
+  hash = crypto.createHash(this.hashFunc);
+  var tempPath = path.join(this.basePath, 'tmp');
+  var tempFile = path.join(tempPath, psudoRandomish());
+  var psopts = {
+    objectMode: true,
+    decodeStrings: false
+  };
+  var output = new PassThrough(psopts);
+  var input = new PassThrough(psopts);
+  mkdirp(tempPath, function (err){
+    if (err) {
+      output.emit('error', err);
+      return;
+    }
+    var fstream = fs.createWriteStream(tempFile);
+    input.pipe(hash);
+    input.pipe(fstream);
+    input.on('end', function (){
+      var fileHash = hash.read().toString('hex');
+      var hashPath = self.hashPaths(fileHash);
+      mkdirp(hashPath.folder, function (err){
+        if (err) {
+          output.emit('error', err);
+          return;
+        }
+        var outStream = fs.createWriteStream(hashPath.full);
+        var fromTemp = fs.createReadStream(tempFile);
+        fromTemp.pipe(outStream);
+        fromTemp.on('end', function (){
+          fs.unlink(tempFile, function (err) {
+            if (err) {
+              output.emit('error', err);
+            } else {
+              fs.rmdir(tempPath, function () {
+                output.write(fileHash);
+                output.end();
+              });
+            }
+          });
+        });
+      });
     });
   });
+  return duplexer(input, output);
 };
 Cabs.prototype.read = function(hash, callback) {
   var paths = this.hashPaths(hash);
@@ -142,5 +225,10 @@ Cabs.prototype.has = function (hash, callback) {
     callback(null, answer);
   });
 };
-
+Cabs.prototype.writeStream = function() {
+  return new Chunker(this, this.limit);
+};
+Cabs.prototype.readStream = function() {
+  return pipeline(readCabs(this), flatten());
+};
 module.exports = Cabs;

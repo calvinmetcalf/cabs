@@ -130,9 +130,9 @@ describe('cab', function(){
     });
     tdata.pipe(outstream);
   });
-  it('should work with writeFile', function(done){
+  it('write should work without a chunk and callback', function(done){
     var cabs = new Cabs('./testData3');
-    var wf = cabs.writeFile();
+    var wf = cabs.write();
     var chunker = new ByteStream(2);
     chunker.pipe(wf);
     var hashes = [];

@@ -14,7 +14,7 @@ function Chunker(dest, limit) {
   });
   this.limit = limit || 4096; // 4KB, arbitrary
   this.dest = dest;
-  this.currentBatch = dest.writeFile();
+  this.currentBatch = dest.write();
   this.size = 0;
   this.place = 0;
 }
@@ -57,7 +57,7 @@ Chunker.prototype._transform = function(obj, _, cb) {
     obj = notFit;
     this.size = 0;
     newSize = obj.length;
-    this.currentBatch = this.dest.writeFile();
+    this.currentBatch = this.dest.write();
   }
   this.size += obj.length;
   this.currentBatch.write(obj);
