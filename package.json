@@ -1,6 +1,6 @@
 {
   "name": "cabs",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "content addressable blob store for node",
   "main": "index.js",
   "dependencies": {
