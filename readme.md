@@ -84,4 +84,10 @@ store.has(hash, callback);
 store.check(hash, callback);
 //similar to has but throws an error if the file doesn't exist
 //or it's hash doesn't match it's address hash
+
+store.writeFile();
+//write to a single file on disc.  Will only ever emit a single string
+//the hash for the combined file you streamed in.
+//unlike writeStream which chunks a big file into multiple smaller ones
+//which can be handled in memory, this method buffers to disk.
 ```
