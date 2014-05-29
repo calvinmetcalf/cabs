@@ -41,7 +41,7 @@ fs.createReadStream('movie.avi')
   
 /** later, to retrieve the movie, stream the hashes into cabs **/
 fs.createReadStream('hashes.json')
-  .pipe(Cabs.read('./storage))
+  .pipe(Cabs.read('./storage'))
   .pipe(fs.createWriteStream('movie-copy.avi'));
 ```
 
